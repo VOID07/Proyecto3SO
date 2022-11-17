@@ -7,13 +7,19 @@ import base64
 import time
 import pathlib
 import os
+import threading
 
 import azure.functions as func
 
 def postRequest(JSON):
-    url = os.getenv("URL")
+    url = "https://ddostargetdago2022.azurewebsites.net/api/histogrameq"
     start_time = time.time()
-    x = requests.post(url, JSON)
+    try:
+        requests.post(url, JSON, timeout=5)
+    except:
+        print("timeout")
+        print("--- %s seconds ---" % (time.time() - start_time))
+    
 
 def loadBinaryAsBase64():
     # Loads image as binary
@@ -46,7 +52,6 @@ def main(mytimer: func.TimerRequest) -> None:
 
     # creates JSON object
     JSON = createJSONFile(base64_image)
-
     postRequest(JSON)
 
     

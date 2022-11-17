@@ -22,10 +22,11 @@ def histogram(p_image):
     # Estiramiento del histograma
     B = np.uint8((A-r_min)/(r_max-r_min)*255)
     B = B.tolist()
+
+    # Saves image and loads as a Base64 binary to return to the
     plt.imshow(B)
     name = f'/tmp/images/{time.time()}.jpg'
     plt.imsave(f'{name}', B, cmap='gray')
-
     file = open(name, 'rb')
     bytes = base64.b64encode(file.read()).decode(ENCODING)
     return bytes
@@ -34,6 +35,7 @@ def histogram(p_image):
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
+    # Gets image from json
     image = req.params.get('image')
     if not image:
         try:
@@ -45,13 +47,9 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     if image:
 
-        # Decode bas64 image to binaries
-        # Save image as a file in the FS
-        # folder = r'/tmp/images'
-        # os.makedirs(folder, exist_ok=True)
-        # name =  f'/tmp/images/{time.time()}.jpg'
+        # create a writable image and write the decoding result
         name =  f'/images/{time.time()}.jpg'
-        image_result = open(name, 'w+b') # create a writable image and write the decoding result
+        image_result = open(name, 'w+b')
         image_binary = base64.b64decode(image)
         image_result.write(image_binary)
         
@@ -62,12 +60,14 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         # Perform histogram stretch
         image2 = histogram(img_arr)
 
+        # Encodes the image into a json to return to the client
         object = {
             "image": image2
         }
 
         dump = json.dumps(object)
         return func.HttpResponse(dump)
+
     else:
         return func.HttpResponse(
              "This HTTP triggered function executed successfully. Pass an image to execute successfully",
